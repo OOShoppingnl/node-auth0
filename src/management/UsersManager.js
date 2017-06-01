@@ -1,5 +1,6 @@
 var RestClient = require('rest-facade').Client;
-var ArgumentError = require('rest-facade').ArgumentError;
+var ArgumentError = require('../exceptions').ArgumentError;
+var Auth0RestClient = require('../Auth0RestClient');
 
 
 /**
@@ -38,7 +39,7 @@ var UsersManager = function (options){
     query: { repeatParams: false }
   };
 
-  this.users = new RestClient(options.baseUrl + '/users/:id', clientOptions);
+  this.users =  new Auth0RestClient(options.baseUrl + '/users/:id', clientOptions);
 
   /**
    * Provides an abstraction layer for consuming the
