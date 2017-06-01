@@ -30,6 +30,8 @@
   "homepage": "https://github.com/auth0/node-auth0",
   "dependencies": {
     "bluebird": "^2.10.2",
+    "lru-memoizer": "^1.11.1",
+    "object.assign": "^4.0.4",
     "request": "^2.81.0",
     "rest-facade": "^1.5.0"
   },
