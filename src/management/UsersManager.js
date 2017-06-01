@@ -1,6 +1,7 @@
 var RestClient = require('rest-facade').Client;
 var ArgumentError = require('../exceptions').ArgumentError;
 var Auth0RestClient = require('../Auth0RestClient');
+var ManagementTokenProvider = require('./ManagementTokenProvider');
 
 
 /**
@@ -39,7 +40,14 @@ var UsersManager = function (options){
     query: { repeatParams: false }
   };
 
-  this.users =  new Auth0RestClient(options.baseUrl + '/users/:id', clientOptions);
+      // check provider is set
+  var provider = new ManagementTokenProvider({
+    clientID: 'nKaOxDlXtzwcySsC47SstP4X3BGjQEa3',
+    clientSecret: '8cbIWJhHGsodPiCYhDNL7Atb1iV4h88_kGSgJTGc5Sm7Ba8kdu0tE8jMJEaNmT9t',
+    domain: 'dctoon-dev.auth0.com'
+  });
+
+  this.users =  new Auth0RestClient(options.baseUrl + '/users/:id', clientOptions, provider);
 
   /**
    * Provides an abstraction layer for consuming the
