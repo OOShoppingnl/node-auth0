@@ -11,9 +11,10 @@ Auth0RestClient.prototype.getAll = function ( /* [params], [callback] */ ) {
   var self = this;
   return new Promise(function (resolve, reject) {
 
-    self.provider.getAccessToken()
+    self.provider.getToken()
       .then(function (token) {
-        self.options.headers['Authorization'] = 'Bearer ' + token;
+        
+        self.options.headers['Authorization'] = 'Bearer ' + token.access_token;
 
         arguments = arguments && [];
         var callbackFunction = function (err, data) {

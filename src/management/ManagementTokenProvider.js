@@ -4,7 +4,6 @@ var util = require('util');
 var utils = require('../utils');
 var jsonToBase64 = utils.jsonToBase64;
 var ArgumentError = require('../exceptions').ArgumentError;
-var memoizer = require('lru-memoizer');
 
 var BASE_URL_FORMAT = 'https://%s';
 
@@ -71,13 +70,14 @@ var ManagementTokenProvider = function (options) {
 /**
  * Return an object with information about the current client,
  *
- * @method    getAccessToken
+ * @method    getToken
  * @memberOf  module:management.ManagementTokenProvider.prototype
  *
  * @return {Promise}   Promise returning the access token.
  */
-ManagementTokenProvider.prototype.getAccessToken = function () {
+ManagementTokenProvider.prototype.getToken = function () {
   var self = this;
+  this.responseData = this.responseData || {};
 
   var options = {
     "client_id": this.options.clientID,
@@ -86,14 +86,11 @@ ManagementTokenProvider.prototype.getAccessToken = function () {
     "audience": 'https://dctoon-dev.auth0.com/api/v2/'
   };
 
-  if (this.cacheEnabled && this.expiresAt && (new Date().getTime() < this.expiresAt)) {
-    console.log('Get access_token from cache');
-    return new Promise(function (resolve, reject) {
-      return resolve(self.access_token);
-    });
-  }
-
   return new Promise(function (resolve, reject) {
+    if (self.cacheEnabled && self.responseData.expiresAt && (new Date().getTime() < self.responseData.expiresAt)) {
+      return resolve(self.responseData);
+    }
+
     self.resource.create(options, function (err, data) {
       if (err) {
         return reject(err);
@@ -101,9 +98,9 @@ ManagementTokenProvider.prototype.getAccessToken = function () {
       if (self.cacheEnabled) {
         self.access_token = data.access_token;
         self.expiresAt = data.expires_in * 1000 + new Date().getTime();
+        self.responseData = data;
       }
-      console.log(data.expires_in);
-      return resolve(data.access_token);
+      return resolve(data);
     });
   });
 };
