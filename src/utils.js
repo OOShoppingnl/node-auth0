@@ -1,5 +1,6 @@
 var Promise = require('bluebird');
 var request = require('request');
+var pkg = require('../package.json');
 
 
 /**
@@ -69,7 +70,37 @@ utils.getRequestPromise = function (settings) {
       }
 
       resolve(res.body);
-    });
-    
+    });    
   });
 }
+
+/**
+ * Return an object with information about the current client,
+ *
+ * @method    getClientInfo
+ * @memberOf  module:utils
+ *
+ * @return {Object}   Object containing client information.
+ */
+utils.getClientInfo = function () {
+  var clientInfo = {
+    name: 'node-auth0',
+    version: pkg.version,
+    dependencies: [],
+    environment: [{
+      name: 'node.js',
+      version: process.version.replace('v', '')
+    }]
+  };
+  // Add the dependencies to the client info object.
+  Object
+    .keys(pkg.dependencies)
+    .forEach(function (name) {
+      clientInfo.dependencies.push({
+        name: name,
+        version: pkg.dependencies[name]
+      });
+    });
+
+  return clientInfo;
+};

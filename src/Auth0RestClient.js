@@ -17,19 +17,15 @@ Auth0RestClient.prototype.getAll = function ( /* [params], [callback] */ ) {
 
         arguments = arguments && [];
         var callbackFunction = function (err, data) {
-          console.log('callback');
           if (err) return reject(err);
           return resolve(data);
         };
-        arguments.push(callbackFunction)
+        arguments.push(callbackFunction);
 
-        return self.client.getAll.apply(self.client, arguments);;
+        self.client.getAll.apply(self.client, arguments);;
       })
       .catch(function (err) {
-        console.log(err);
-        return new Promise(function (errResolve, errReject) {
-          errReject(err);
-        });
+        reject(err);
       });
   });
 };
