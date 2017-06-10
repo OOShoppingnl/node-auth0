@@ -41,14 +41,14 @@ var UsersManager = function (options){
   };
 
   // check provider is set
-  var provider = new ManagementTokenProvider({
-    clientID: 'nKaOxDlXtzwcySsC47SstP4X3BGjQEa3',
-    clientSecret: '8cbIWJhHGsodPiCYhDNL7Atb1iV4h88_kGSgJTGc5Sm7Ba8kdu0tE8jMJEaNmT9t',
-    domain: 'dctoon-dev.auth0.com',
-    enableCaching: true
-  });
-
-  this.users = new Auth0RestClient(options.baseUrl + '/users/:id', clientOptions, provider);
+  // var provider = new ManagementTokenProvider({
+  //   clientID: 'nKaOxDlXtzwcySsC47SstP4X3BGjQEa3',
+  //   clientSecret: '8cbIWJhHGsodPiCYhDNL7Atb1iV4h88_kGSgJTGc5Sm7Ba8kdu0tE8jMJEaNmT9t',
+  //   domain: 'dctoon-dev.auth0.com',
+  //   enableCaching: true
+  // });
+  
+  this.users = new Auth0RestClient(options.baseUrl + '/users/:id', clientOptions); // , provider
 
   /**
    * Provides an abstraction layer for consuming the
@@ -140,6 +140,7 @@ UsersManager.prototype.create = function (data, cb) {
  * @return  {Promise|undefined}
  */
 UsersManager.prototype.getAll = function (params) {
+  console.log('Hi');
   return this.users.getAll.apply(this.users, arguments);
 };
 
