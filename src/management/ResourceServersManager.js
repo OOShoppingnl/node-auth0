@@ -1,6 +1,6 @@
-var RestClient = require('rest-facade').Client;
 var ArgumentError = require('rest-facade').ArgumentError;
 var utils = require('../utils');
+var Auth0RestClient = require('../Auth0RestClient');
 
 /**
  * @class ResourceServersManager
@@ -46,9 +46,9 @@ var ResourceServersManager = function (options) {
    * Provides an abstraction layer for consuming the
    * {@link https://auth0.com/docs/api/v2#!/ResourceServers Auth0 Resource Servers endpoint}.
    *
-   * @type {external:RestClient}
+   * @type {external:Auth0RestClient}
    */
-  this.resource = new RestClient(options.baseUrl + '/resource-servers/:id', apiOptions);
+  this.resource = new Auth0RestClient(options.baseUrl + '/resource-servers/:id', apiOptions, options.managementTokenProvider);
 };
 
 /**

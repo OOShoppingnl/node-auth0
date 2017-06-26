@@ -1,6 +1,5 @@
-var RestClient = require('rest-facade').Client;
 var ArgumentError = require('rest-facade').ArgumentError;
-
+var Auth0RestClient = require('../Auth0RestClient');
 
 /**
  * Simple facade for consuming a REST API endpoint.
@@ -42,9 +41,9 @@ var StatsManager = function (options){
    * Provides an abstraction layer for consuming the
    * {@link https://auth0.com/docs/api/v2#!/Stats Stats endpoint}.
    *
-   * @type {external:RestClient}
+   * @type {external:Auth0RestClient}
    */
-  this.stats = new RestClient(options.baseUrl + '/stats/:type', clientOptions);
+  this.stats = new Auth0RestClient(options.baseUrl + '/stats/:type', clientOptions, options.managementTokenProvider);
 };
 
 

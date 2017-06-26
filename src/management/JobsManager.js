@@ -3,9 +3,8 @@ var extend = require('util')._extend;
 var Promise = require('bluebird');
 var fs = require('fs');
 
-var RestClient = require('rest-facade').Client;
 var ArgumentError = require('rest-facade').ArgumentError;
-
+var Auth0RestClient = require('../Auth0RestClient');
 
 /**
  * Simple facade for consuming a REST API endpoint.
@@ -49,9 +48,9 @@ var JobsManager = function (options){
    * Provides an abstraction layer for consuming the
    * {@link https://auth0.com/docs/api/v2#!/Jobs Jobs endpoint}.
    *
-   * @type {external:RestClient}
+   * @type {external:Auth0RestClient}
    */
-  this.jobs = new RestClient(options.baseUrl + '/jobs/:id', clientOptions);
+  this.jobs = new Auth0RestClient(options.baseUrl + '/jobs/:id', clientOptions, options.managementTokenProvider);
 };
 
 

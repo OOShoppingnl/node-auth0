@@ -1,7 +1,6 @@
-var RestClient = require('rest-facade').Client;
 var ArgumentError = require('rest-facade').ArgumentError;
 var utils = require('../utils');
-
+var Auth0RestClient = require('../Auth0RestClient');
 
 /**
  * @class ConnectionsManager
@@ -41,9 +40,9 @@ var ConnectionsManager = function (options) {
    * {@link https://auth0.com/docs/api/v2#!/ConnectionsManagers Auth0
    *  Connections}.
    *
-   * @type {external:RestClient}
+   * @type {external:Auth0RestClient}
    */
-  this.resource = new RestClient(options.baseUrl + '/connections/:id ', apiOptions);
+  this.resource = new Auth0RestClient(options.baseUrl + '/connections/:id ', apiOptions, options.managementTokenProvider);
 };
 
 

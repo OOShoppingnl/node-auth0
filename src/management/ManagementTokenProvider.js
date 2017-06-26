@@ -1,9 +1,11 @@
 var RestClient = require('rest-facade').Client;
 var Promise = require('bluebird');
 var util = require('util');
+var memoizer = require('lru-memoizer');
+var ArgumentError = require('rest-facade').ArgumentError;
+var APIError =  require('rest-facade').APIError;
 var utils = require('../utils');
 var jsonToBase64 = utils.jsonToBase64;
-var ArgumentError = require('../exceptions').ArgumentError;
 
 var BASE_URL_FORMAT = 'https://%s';
 
@@ -46,9 +48,6 @@ var ManagementTokenProvider = function (options) {
     throw new ArgumentError('Must provide a domain');
   }
 
-  this.cacheEnabled = !!options.enableCaching;
-  console.log('CacheEnabled', this.cacheEnabled);
-
   this.options = options;
 
   var managerOptions = {
@@ -68,37 +67,62 @@ var ManagementTokenProvider = function (options) {
 }
 
 /**
- * Return an object with information about the current client,
+ * Returns the access_token.
  *
- * @method    getToken
+ * @method    getCachedAccessToken
  * @memberOf  module:management.ManagementTokenProvider.prototype
  *
  * @return {Promise}   Promise returning the access token.
  */
-ManagementTokenProvider.prototype.getToken = function () {
+ManagementTokenProvider.prototype.getCachedAccessToken = function () {
   var self = this;
-  this.responseData = this.responseData || {};
+
+  return new Promise(function (resolve, reject) {
+    self.getCachedClientCredentialsGrant(self.options.domain, self.options.clientID, self.options.clientSecret)
+      .then(function (data) {
+        return resolve(data.access_token);
+      }).catch(function (err) {
+        return reject(err);
+      });
+  });
+}
+
+ManagementTokenProvider.prototype.getCachedClientCredentialsGrant = Promise.promisify(
+  memoizer({
+    load: function (domain, clientId, clientSecret, callback) {
+      this.executeClientCredentialsGrant(domain, clientId, clientSecret)
+        .then(function (data) {
+          return callback(null, data);
+        })
+        .catch(function (err) {
+          return callback(err);
+        });
+    },
+    hash: function (domain, clientId) {
+      return domain + '-' + clientId;
+    },
+    itemMaxAge: function (domain, clientId, clientSecret, data) {
+      return data.expires_in * 1000;
+    },
+    max: 10,
+    maxAge: 1000 * 60
+  })
+);
+
+ManagementTokenProvider.prototype.executeClientCredentialsGrant = function () {
+  var self = this;
 
   var options = {
     "client_id": this.options.clientID,
     "client_secret": this.options.clientSecret,
     "grant_type": 'client_credentials',
-    "audience": 'https://dctoon-dev.auth0.com/api/v2/'
+    "audience": 'https://' + this.options.domain + '/api/v2/'
   };
 
   return new Promise(function (resolve, reject) {
-    if (self.cacheEnabled && self.responseData.expiresAt && (new Date().getTime() < self.responseData.expiresAt)) {
-      return resolve(self.responseData);
-    }
-
     self.resource.create(options, function (err, data) {
       if (err) {
         return reject(err);
-      }
-      if (self.cacheEnabled) {
-        self.access_token = data.access_token;
-        self.expiresAt = data.expires_in * 1000 + new Date().getTime();
-        self.responseData = data;
       }
       return resolve(data);
     });

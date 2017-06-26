@@ -21,6 +21,7 @@ var JobsManager = require('./JobsManager');
 var TicketsManager = require('./TicketsManager');
 var LogsManager = require('./LogsManager');
 var ResourceServersManager = require('./ResourceServersManager');
+var ManagementTokenProvider = require('./ManagementTokenProvider');
 
 var BASE_URL_FORMAT = 'https://%s/api/v2';
 
@@ -48,20 +49,43 @@ var BASE_URL_FORMAT = 'https://%s/api/v2';
  * });
  *
  * @param   {Object}  options           Options for the ManagementClient SDK.
- * @param   {String}  options.token     API access token.
+ * @param   {String}  options.token     API access token. (not required when Client ID and Client Secret are provided)
  * @param   {String}  [options.domain]  ManagementClient server domain.
+ * @param   {String}  [options.clientId]      Non Interactive client ID.
+ * @param   {String}  [options.clientSecret]  Non Interactive client Secret.
  */
 var ManagementClient = function (options) {
   if (!options || typeof options !== 'object') {
     throw new ArgumentError('Management API SDK options must be an object');
   }
 
-  if (!options.token || options.token.length === 0) {
-    throw new ArgumentError('An access token must be provided');
-  }
-
   if (!options.domain || options.domain.length === 0) {
     throw new ArgumentError('Must provide a domain');
+  }
+
+  if (!options.token || options.token.length === 0) {
+    var isClientIdMissing = !options.clientId || options.clientId.length === 0;
+    var isClientSecretMissing = !options.clientSecret || options.clientSecret.length === 0;
+
+    if(isClientIdMissing && isClientSecretMissing){
+      throw new ArgumentError('An access token must be provided or a Client ID and Client Secret');
+    }
+
+    if (isClientIdMissing) {
+      throw new ArgumentError('Must provide a client Id');
+    }
+
+    if (isClientSecretMissing) {
+      throw new ArgumentError('Must provide a client secret');
+    }
+
+
+
+    this.managementTokenProvider = new ManagementTokenProvider({
+      clientID: options.clientId,
+      clientSecret: options.clientSecret,
+      domain: options.domain
+    });
   }
 
   var managerOptions = {
@@ -70,7 +94,8 @@ var ManagementClient = function (options) {
       'User-agent': 'node.js/' + process.version.replace('v', ''),
       'Content-Type': 'application/json'
     },
-    baseUrl: util.format(BASE_URL_FORMAT, options.domain)
+    baseUrl: util.format(BASE_URL_FORMAT, options.domain),
+    managementTokenProvider: this.managementTokenProvider
   };
 
   if (options.telemetry !== false) {

@@ -29,9 +29,8 @@ describe('ManagementClient', function () {
       var client = ManagementClient.bind(null, options);
 
       expect(client)
-        .to.throw(ArgumentError, 'An access token must be provided');
+        .to.throw(ArgumentError, 'An access token must be provided or a Client ID and Client Secret');
     });
-
 
     it('should raise an error when the domain is not valid', function () {
       var client = ManagementClient.bind(null, { token: 'token', domain: '' });
@@ -40,6 +39,19 @@ describe('ManagementClient', function () {
         .to.throw(ArgumentError, 'Must provide a domain');
     });
 
+    it('should raise an error when the client id is not set', function () {
+      var client = ManagementClient.bind(null, { token: '', domain: 'domain', clientId: '', clientSecret: 'secret' });
+
+      expect(client)
+        .to.throw(ArgumentError, 'Must provide a client Id');
+    });
+
+    it('should raise an error when the client secret is not set', function () {
+      var client = ManagementClient.bind(null, { token: '', domain: 'domain', clientId: 'clientId', clientSecret: '' });
+
+      expect(client)
+        .to.throw(ArgumentError, 'Must provide a client secret');
+    });
 
     describe('instance properties', function () {
       var manager;

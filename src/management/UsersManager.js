@@ -1,8 +1,5 @@
-var RestClient = require('rest-facade').Client;
-var ArgumentError = require('../exceptions').ArgumentError;
+var ArgumentError = require('rest-facade').ArgumentError;
 var Auth0RestClient = require('../Auth0RestClient');
-var ManagementTokenProvider = require('./ManagementTokenProvider');
-
 
 /**
  * Simple facade for consuming a REST API endpoint.
@@ -39,46 +36,38 @@ var UsersManager = function (options){
     headers: options.headers,
     query: { repeatParams: false }
   };
-
-  // check provider is set
-  // var provider = new ManagementTokenProvider({
-  //   clientID: 'nKaOxDlXtzwcySsC47SstP4X3BGjQEa3',
-  //   clientSecret: '8cbIWJhHGsodPiCYhDNL7Atb1iV4h88_kGSgJTGc5Sm7Ba8kdu0tE8jMJEaNmT9t',
-  //   domain: 'dctoon-dev.auth0.com',
-  //   enableCaching: true
-  // });
   
-  this.users = new Auth0RestClient(options.baseUrl + '/users/:id', clientOptions); // , provider
+  this.users = new Auth0RestClient(options.baseUrl + '/users/:id', clientOptions, options.managementTokenProvider);
 
   /**
    * Provides an abstraction layer for consuming the
    * {@link https://auth0.com/docs/api/v2#!/Users/delete_multifactor_by_provider
    * Multifactor Provider endpoint}.
    *
-   * @type {external:RestClient}
+   * @type {external:Auth0RestClient}
    */
-  this.multifactor = new RestClient(options.baseUrl + '/users/:id/multifactor/:provider', clientOptions);
+  this.multifactor = new Auth0RestClient(options.baseUrl + '/users/:id/multifactor/:provider', clientOptions, options.managementTokenProvider);
 
   /**
    * Provides a simple abstraction layer for linking user accounts.
    *
-   * @type {external:RestClient}
+   * @type {external:Auth0RestClient}
    */
-  this.identities = new RestClient(options.baseUrl + '/users/:id/identities/:provider/:user_id', clientOptions);
+  this.identities = new Auth0RestClient(options.baseUrl + '/users/:id/identities/:provider/:user_id', clientOptions, options.managementTokenProvider);
 
   /**
    * Provides a simple abstraction layer for user logs
    *
-   * @type {external:RestClient}
+   * @type {external:Auth0RestClient}
    */
-  this.userLogs = new RestClient(options.baseUrl + '/users/:id/logs', clientOptions);
+  this.userLogs = new Auth0RestClient(options.baseUrl + '/users/:id/logs', clientOptions, options.managementTokenProvider);
 
   /**
    * Provides an abstraction layer for retrieving Guardian enrollments.
    *
-   * @type {external:RestClient}
+   * @type {external:Auth0RestClient}
    */
-  this.enrollments = new RestClient(options.baseUrl + '/users/:id/enrollments', clientOptions);
+  this.enrollments = new Auth0RestClient(options.baseUrl + '/users/:id/enrollments', clientOptions, options.managementTokenProvider);
 };
 
 
@@ -140,7 +129,6 @@ UsersManager.prototype.create = function (data, cb) {
  * @return  {Promise|undefined}
  */
 UsersManager.prototype.getAll = function (params) {
-  console.log('Hi');
   return this.users.getAll.apply(this.users, arguments);
 };
 

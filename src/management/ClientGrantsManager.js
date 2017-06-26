@@ -1,7 +1,6 @@
-var RestClient = require('rest-facade').Client;
 var ArgumentError = require('rest-facade').ArgumentError;
 var utils = require('../utils');
-
+var Auth0RestClient = require('../Auth0RestClient');
 
 /**
  * @class ClientGrantsManager
@@ -44,9 +43,9 @@ var ClientGrantsManager = function (options) {
    * Provides an abstraction layer for consuming the
    * {@link https://auth0.com/docs/api/v2#!/Client_Grants Auth0 Client Grantss endpoint}.
    *
-   * @type {external:RestClient}
+   * @type {external:Auth0RestClient}
    */
-  this.resource = new RestClient(options.baseUrl + '/client-grants/:id', clientOptions);
+  this.resource = new Auth0RestClient(options.baseUrl + '/client-grants/:id', clientOptions, options.managementTokenProvider);
 };
 
 

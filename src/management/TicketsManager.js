@@ -1,5 +1,5 @@
-var RestClient = require('rest-facade').Client;
 var ArgumentError = require('rest-facade').ArgumentError;
+var Auth0RestClient = require('../Auth0RestClient');
 
 
 /**
@@ -31,9 +31,9 @@ var TicketsManager = function (options){
    * Provides an abstraction layer for consuming the
    * {@link https://auth0.com/docs/api/v2#!/Tickets Tickets endpoint}.
    *
-   * @type {external:RestClient}
+   * @type {external:Auth0RestClient}
    */
-  this.ticket = new RestClient(options.baseUrl + '/tickets/:type', clientOptions);
+  this.ticket = new Auth0RestClient(options.baseUrl + '/tickets/:type', clientOptions, options.managementTokenProvider);
 };
 
 

@@ -1,7 +1,6 @@
-var RestClient = require('rest-facade').Client;
 var ArgumentError = require('rest-facade').ArgumentError;
 var utils = require('../utils');
-
+var Auth0RestClient = require('../Auth0RestClient');
 
 /**
  * @class LogsManager
@@ -41,9 +40,9 @@ var LogsManager = function (options) {
    * {@link https://auth0.com/docs/api/v2#!/LogsManagers Auth0
    *  Logs}.
    *
-   * @type {external:RestClient}
+   * @type {external:Auth0RestClient}
    */
-  this.resource = new RestClient(options.baseUrl + '/logs/:id ', apiOptions);
+  this.resource = new Auth0RestClient(options.baseUrl + '/logs/:id ', apiOptions, options.managementTokenProvider);
 };
 
 /**

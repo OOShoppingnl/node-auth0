@@ -13,10 +13,9 @@ var Auth0RestClient = function (resourceUrl, options, provider) {
     var self = this;
     return new Promise(function (resolve, reject) {
 
-      self.provider.getToken()
-        .then(function (token) {
-
-          self.options.headers['Authorization'] = 'Bearer ' + token.access_token;
+      self.provider.getCachedAccessToken()
+        .then(function (access_token) {
+          self.options.headers['Authorization'] = 'Bearer ' + access_token;
 
           args = args && [];
           var callbackFunction = function (err, data) {
@@ -28,6 +27,7 @@ var Auth0RestClient = function (resourceUrl, options, provider) {
           self.client[method].apply(self.client, args);;
         })
         .catch(function (err) {
+          console.log('getCachedAccessToken err', err);
           reject(err);
         });
     });
