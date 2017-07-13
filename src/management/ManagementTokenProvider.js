@@ -90,7 +90,14 @@ ManagementTokenProvider.prototype.getCachedAccessToken = function () {
 ManagementTokenProvider.prototype.getCachedClientCredentialsGrant = Promise.promisify(
   memoizer({
     load: function (domain, clientId, clientSecret, callback) {
-      this.executeClientCredentialsGrant(domain, clientId, clientSecret)
+      var options = {
+        "client_id": clientId,
+        "client_secret": clientSecret,
+        "grant_type": 'client_credentials',
+        "audience": 'https://' + domain + '/api/v2/'
+      };
+
+      this.resource.create(options)
         .then(function (data) {
           return callback(null, data);
         })
@@ -102,31 +109,12 @@ ManagementTokenProvider.prototype.getCachedClientCredentialsGrant = Promise.prom
       return domain + '-' + clientId;
     },
     itemMaxAge: function (domain, clientId, clientSecret, data) {
-      return data.expires_in * 1000;
+      if(data.expires_in) return data.expires_in * 1000;
+      return 1000;
     },
-    max: 10,
-    maxAge: 1000 * 60
+    max: 100,
+    maxAge: 1000 * 60 // 1h
   })
 );
-
-ManagementTokenProvider.prototype.executeClientCredentialsGrant = function () {
-  var self = this;
-
-  var options = {
-    "client_id": this.options.clientID,
-    "client_secret": this.options.clientSecret,
-    "grant_type": 'client_credentials',
-    "audience": 'https://' + this.options.domain + '/api/v2/'
-  };
-
-  return new Promise(function (resolve, reject) {
-    self.resource.create(options, function (err, data) {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(data);
-    });
-  });
-};
 
 module.exports = ManagementTokenProvider;

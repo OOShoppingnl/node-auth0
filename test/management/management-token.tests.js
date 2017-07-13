@@ -67,12 +67,14 @@ describe.only('ManagementTokenProvider', function () {
   });
 
 
-  describe('executeClientCredentialsGrant', function(){
-
+  describe('getCachedAccessToken', function(){
+    var defaultConfig = { clientID: 'clientID', clientSecret: 'clientSecret', 'domain': 'auth0-node-sdk.auth0.com' };
     it('should handle network errors correctly', function (done) {
-      var client = new ManagementTokenProvider({ clientID: 'clientID', clientSecret: 'clientSecret', 'domain': 'domain' });
+      var config = defaultConfig;
+      config.domain = 'domain';
+      var client = new ManagementTokenProvider(config);
 
-      client.executeClientCredentialsGrant()
+      client.getCachedAccessToken()
         .catch(function(err){
           expect(err)
             .to.exist
@@ -83,13 +85,13 @@ describe.only('ManagementTokenProvider', function () {
     }); 
 
     it('should handle unauthorized errors correctly', function (done) {
-      var client = new ManagementTokenProvider({ clientID: 'clientID', clientSecret: 'clientSecret', 'domain': 'auth0-node-sdk.auth0.com' });
+      var client = new ManagementTokenProvider(defaultConfig);
 
-      nock('https://auth0-node-sdk.auth0.com')
+      nock('https://' + defaultConfig.domain)
         .post('/oauth/token')
         .reply(401);
 
-      client.executeClientCredentialsGrant()
+      client.getCachedAccessToken()
         .catch(function(err){
           expect(err)
             .to.exist
@@ -101,43 +103,110 @@ describe.only('ManagementTokenProvider', function () {
     }); 
 
     it('should return access token', function (done) {
-      var client = new ManagementTokenProvider({ clientID: 'clientID', clientSecret: 'clientSecret', 'domain': 'auth0-node-sdk.auth0.com' });
+      var config = defaultConfig;
+      config.domain = 'auth0-node-sdk-1.auth0.com'
+      var client = new ManagementTokenProvider(config);
 
-      var test = nock('https://auth0-node-sdk.auth0.com')
+      nock('https://' + config.domain)
         .post('/oauth/token')
         .reply(200, {
-          access_token: 'token'
+          access_token: 'token',
+          expires_in: 100
         })
 
-      client.executeClientCredentialsGrant()
-        .then(function(data){
-          expect(data).to.exist;
-          expect(data.access_token).to.exist;
-          expect(data.access_token).to.be.equal('token');
+      client.getCachedAccessToken()
+        .then(function(access_token){
+          expect(access_token).to.exist;
+          expect(access_token).to.be.equal('token');
           done();
           nock.cleanAll();
         });
     }); 
 
-    it('should contain body payload', function (done) {
-    var client = new ManagementTokenProvider({ clientID: 'clientID', clientSecret: 'clientSecret', 'domain': 'auth0-node-sdk.auth0.com' });
+    it('should contain correct body payload', function (done) {
+      var config = defaultConfig;
+      config.domain = 'auth0-node-sdk-2.auth0.com'
+      var client = new ManagementTokenProvider(defaultConfig);
+      
+       nock('https://' + config.domain)
+        .post('/oauth/token',function(body, test, test2) {
+          expect(body.client_id).to.equal('clientID');
+          expect(body.client_secret).to.equal('clientSecret');
+          expect(body.grant_type).to.equal('client_credentials');
+          expect(body.audience).to.equal('https://auth0-node-sdk-2.auth0.com/api/v2/');
+          return true;
+        })
+        .reply(function(uri, requestBody, cb) {
+          return cb(null, [200, { access_token: 'token', expires_in: 100 }]);
+        });
 
-    var test = nock('https://auth0-node-sdk.auth0.com')
-      .post('/oauth/token', {
-        "client_id": 'clientID',
-        "client_secret": 'clientSecret',
-        "grant_type": 'client_credentials',
-        "audience": 'https://auth0-node-sdk.auth0.com/api/v2/'
-      })
-      .reply(200, {
-        access_token: 'token'
-      })
-
-    client.executeClientCredentialsGrant()
-      .then(function(data){
-        done();
-        nock.cleanAll();
-      });
+      client.getCachedAccessToken()
+        .then(function(data){
+          done();
+          nock.cleanAll();
+        });
     });
+
+    it('should return access token from the cache the second call', function (done) {
+      var config = defaultConfig;
+      config.domain = 'auth0-node-sdk-3.auth0.com'
+      var client = new ManagementTokenProvider(config);
+
+      nock('https://' + config.domain)
+        .post('/oauth/token')
+        .once()
+        .reply(200, {
+          access_token: 'access_token',
+          expires_in: 100
+        })
+
+      client.getCachedAccessToken()
+        .then(function(access_token){
+          expect(access_token).to.exist;
+          expect(access_token).to.be.equal('access_token');
+
+           client.getCachedAccessToken()
+            .then(function(access_token){
+              expect(access_token).to.exist;
+              expect(access_token).to.be.equal('access_token');
+              done();
+              nock.cleanAll();
+            });
+        });
+    }); 
+
+    it('should request new access token when cache is expired', function (done) {
+      var config = defaultConfig;
+      config.domain = 'auth0-node-sdk-4.auth0.com'
+      var client = new ManagementTokenProvider(config);
+
+      nock('https://' + config.domain)
+        .post('/oauth/token')
+        .reply(200, {
+          access_token: 'access_token',
+          expires_in: 0.0001 //100ms
+        })
+        .post('/oauth/token')
+        .reply(200, {
+          access_token: 'new_access_token',
+          expires_in: 100
+        })
+
+      client.getCachedAccessToken()
+        .then(function(access_token){
+          expect(access_token).to.exist;
+          expect(access_token).to.be.equal('access_token');
+
+          setTimeout(function() {
+            client.getCachedAccessToken()
+              .then(function(access_token){
+                expect(access_token).to.exist;
+                expect(access_token).to.be.equal('new_access_token');
+                done();
+                nock.cleanAll();
+              });
+          }, 150); // 150ms 
+        });
+    }); 
   });
 });
