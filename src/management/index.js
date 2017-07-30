@@ -47,6 +47,18 @@ var BASE_URL_FORMAT = 'https://%s/api/v2';
  *   token: '{YOUR_API_V2_TOKEN}',
  *   domain: '{YOUR_ACCOUNT}.auth0.com'
  * });
+ * 
+ * @example <caption>
+ *   Initialize your client class with an API v2 token (you can generate one
+ *   <a href="https://auth0.com/docs/apiv2">here</a>) and a domain.
+ * </caption>
+ *
+ * var ManagementClient = require('auth0').ManagementClient;
+ * var auth0 = new ManagementClient({
+ *   clientId: '{YOUR_CLIENT_ID}',
+ *   clientSecret: '{YOUR_CLIENT_SECRET}',
+ *   domain: '{YOUR_ACCOUNT}.auth0.com'
+ * });
  *
  * @param   {Object}  options           Options for the ManagementClient SDK.
  * @param   {String}  options.token     API access token. (not required when Client ID and Client Secret are provided)
@@ -60,7 +72,7 @@ var ManagementClient = function (options) {
   }
 
   if (!options.domain || options.domain.length === 0) {
-    throw new ArgumentError('Must provide a domain');
+    throw new ArgumentError('Must provide a Domain');
   }
 
   if (!options.token || options.token.length === 0) {
@@ -68,18 +80,16 @@ var ManagementClient = function (options) {
     var isClientSecretMissing = !options.clientSecret || options.clientSecret.length === 0;
 
     if(isClientIdMissing && isClientSecretMissing){
-      throw new ArgumentError('An access token must be provided or a Client ID and Client Secret');
+      throw new ArgumentError('An Access Token must be provided or a Client ID and Client Secret');
     }
 
     if (isClientIdMissing) {
-      throw new ArgumentError('Must provide a client Id');
+      throw new ArgumentError('Must provide a Client Id');
     }
 
     if (isClientSecretMissing) {
-      throw new ArgumentError('Must provide a client secret');
+      throw new ArgumentError('Must provide a Client Secret');
     }
-
-
 
     this.managementTokenProvider = new ManagementTokenProvider({
       clientID: options.clientId,
@@ -90,13 +100,16 @@ var ManagementClient = function (options) {
 
   var managerOptions = {
     headers: {
-      'Authorization': 'Bearer ' + options.token,
       'User-agent': 'node.js/' + process.version.replace('v', ''),
       'Content-Type': 'application/json'
     },
     baseUrl: util.format(BASE_URL_FORMAT, options.domain),
     managementTokenProvider: this.managementTokenProvider
   };
+
+  if(options.token && options.token.length === 0){
+      managerOptions.headers['Authorization'] = 'Bearer ' + options.token;
+  }
 
   if (options.telemetry !== false) {
     var telemetry = jsonToBase64(options.clientInfo || utils.getClientInfo());

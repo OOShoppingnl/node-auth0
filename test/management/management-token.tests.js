@@ -8,7 +8,7 @@ var RestClient = require('rest-facade').Client;
 var ManagementTokenProvider = require('../../src/management/ManagementTokenProvider');
 
 
-describe.only('ManagementTokenProvider', function () {
+describe('ManagementTokenProvider', function () {
 
   it('should raise an error when no options object is provided', function () {
     expect(ManagementTokenProvider)
@@ -69,7 +69,7 @@ describe.only('ManagementTokenProvider', function () {
 
   describe('getCachedAccessToken', function(){
     var defaultConfig = { clientID: 'clientID', clientSecret: 'clientSecret', 'domain': 'auth0-node-sdk.auth0.com' };
-    it('should handle network errors correctly', function (done) {
+    it('should handle network errors correctly', function (done) {   
       var config = defaultConfig;
       config.domain = 'domain';
       var client = new ManagementTokenProvider(config);

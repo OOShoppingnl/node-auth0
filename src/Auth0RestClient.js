@@ -1,62 +1,71 @@
 var RestClient = require('rest-facade').Client;
 var Promise = require('bluebird');
+var ArgumentError = require('rest-facade').ArgumentError;
 
 var Auth0RestClient = function (resourceUrl, options, provider) {
+  if (resourceUrl === null || resourceUrl === undefined) {
+    throw new ArgumentError('Must provide a Resource Url');
+  }
+
+  if ('string' !== typeof resourceUrl || resourceUrl.length === 0) {
+    throw new ArgumentError('The provided Resource Url is invalid');
+  }
+
+  if (options === null || typeof options !== 'object') {
+    throw new ArgumentError('Must provide options');
+  }
+
   this.options = options;
   this.provider = provider;
   this.client = new RestClient(resourceUrl, options);
-  this.wrapProvider = function (method, args) {
+
+  this.wrappedProvider = function (method, args) {
     if (!this.provider) {
       return this.client[method].apply(this.client, args);
     }
 
+    var callback;
+    if(args && args[args.length -1] instanceof Function){
+      callback = args[args.length -1];
+    }
+
     var self = this;
-    return new Promise(function (resolve, reject) {
-
-      self.provider.getCachedAccessToken()
-        .then(function (access_token) {
-          self.options.headers['Authorization'] = 'Bearer ' + access_token;
-
-          args = args && [];
-          var callbackFunction = function (err, data) {
-            if (err) return reject(err);
-            return resolve(data);
-          };
-          args.push(callbackFunction);
-
-          self.client[method].apply(self.client, args);;
-        })
-        .catch(function (err) {
-          console.log('getCachedAccessToken err', err);
-          reject(err);
-        });
-    });
+    return this.provider.getCachedAccessToken()
+      .then(function (access_token) {
+        self.options.headers['Authorization'] = 'Bearer ' + access_token;
+        return self.client[method].apply(self.client, args);
+      }).catch(function(err){
+        if(callback){
+          return callback(err);
+        }
+        return Promise.reject(err);
+      });
   }
 };
 
 Auth0RestClient.prototype.getAll = function ( /* [params], [callback] */ ) {
-  return this.wrapProvider('getAll', arguments);
+  return this.wrappedProvider('getAll', arguments);
 };
 
 
 Auth0RestClient.prototype.get = function ( /* [params], [callback] */ ) {
-  return this.wrapProvider('get', arguments);
+  return this.wrappedProvider('get', arguments);
 }
 
 Auth0RestClient.prototype.create = function ( /* [params], [callback] */ ) {
-  return this.wrapProvider('create', arguments);
+  return this.wrappedProvider('create', arguments);
 }
 
 Auth0RestClient.prototype.patch = function ( /* [params], [callback] */ ) {
-  return this.wrapProvider('patch', arguments);
+  return this.wrappedProvider('patch', arguments);
 }
 
 Auth0RestClient.prototype.update = function ( /* [params], [callback] */ ) {
-  return this.wrapProvider('update', arguments);
+  return this.wrappedProvider('update', arguments);
 }
 
 Auth0RestClient.prototype.delete = function ( /* [params], [callback] */ ) {
-  return this.wrapProvider('delete', arguments);
+  return this.wrappedProvider('delete', arguments);
 }
 
 module.exports = Auth0RestClient;

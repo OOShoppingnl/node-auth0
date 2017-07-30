@@ -3,7 +3,7 @@ var Promise = require('bluebird');
 var util = require('util');
 var memoizer = require('lru-memoizer');
 var ArgumentError = require('rest-facade').ArgumentError;
-var APIError =  require('rest-facade').APIError;
+var APIError = require('rest-facade').APIError;
 var utils = require('../utils');
 var jsonToBase64 = utils.jsonToBase64;
 
@@ -27,7 +27,7 @@ var BASE_URL_FORMAT = 'https://%s';
  * var ManagementClient = require('auth0').ManagementClient;
  * var auth0 = new ManagementTokenProvider({
  *   clientID: '{YOUR_NON_INTERACTIVE_CLIENT_ID}',
- *   clientSecret: '{YOUR_NON_INTERACTIVE_CLIENT_SECRET}'
+ *   clientSecret: '{YOUR_NON_INTERACTIVE_CLIENT_SECRET}',
  *   domain: '{YOUR_ACCOUNT}.auth0.com'
  * });
  */
@@ -75,16 +75,10 @@ var ManagementTokenProvider = function (options) {
  * @return {Promise}   Promise returning the access token.
  */
 ManagementTokenProvider.prototype.getCachedAccessToken = function () {
-  var self = this;
-
-  return new Promise(function (resolve, reject) {
-    self.getCachedClientCredentialsGrant(self.options.domain, self.options.clientID, self.options.clientSecret)
-      .then(function (data) {
-        return resolve(data.access_token);
-      }).catch(function (err) {
-        return reject(err);
-      });
-  });
+  return this.getCachedClientCredentialsGrant(this.options.domain, this.options.clientID, this.options.clientSecret)
+    .then(function (data) {
+      return data.access_token
+    });
 }
 
 ManagementTokenProvider.prototype.getCachedClientCredentialsGrant = Promise.promisify(
@@ -109,7 +103,7 @@ ManagementTokenProvider.prototype.getCachedClientCredentialsGrant = Promise.prom
       return domain + '-' + clientId;
     },
     itemMaxAge: function (domain, clientId, clientSecret, data) {
-      if(data.expires_in) return data.expires_in * 1000;
+      if (data.expires_in) return data.expires_in * 1000;
       return 1000;
     },
     max: 100,
