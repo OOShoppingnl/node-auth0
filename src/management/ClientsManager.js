@@ -48,7 +48,7 @@ var ClientsManager = function (options) {
    *
    * @type {external:Auth0RestClient}
    */
-  this.resource = new Auth0RestClient(options.baseUrl + '/clients/:client_id', clientOptions, options.managementTokenProvider);
+  this.resource = new Auth0RestClient(options.baseUrl + '/clients/:client_id', clientOptions, options.tokenProvider);
 };
 
 

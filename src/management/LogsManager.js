@@ -42,7 +42,7 @@ var LogsManager = function (options) {
    *
    * @type {external:Auth0RestClient}
    */
-  this.resource = new Auth0RestClient(options.baseUrl + '/logs/:id ', apiOptions, options.managementTokenProvider);
+  this.resource = new Auth0RestClient(options.baseUrl + '/logs/:id ', apiOptions, options.tokenProvider);
 };
 
 /**

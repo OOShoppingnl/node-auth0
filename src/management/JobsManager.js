@@ -50,7 +50,7 @@ var JobsManager = function (options){
    *
    * @type {external:Auth0RestClient}
    */
-  this.jobs = new Auth0RestClient(options.baseUrl + '/jobs/:id', clientOptions, options.managementTokenProvider);
+  this.jobs = new Auth0RestClient(options.baseUrl + '/jobs/:id', clientOptions, options.tokenProvider);
 };
 
 

@@ -44,7 +44,7 @@ var TenantManager = function (options){
    *
    * @type {external:RestClient}
    */
-  this.tenant = new Auth0RestClient(options.baseUrl + '/tenants/settings', clientOptions,  options.managementTokenProvider);
+  this.tenant = new Auth0RestClient(options.baseUrl + '/tenants/settings', clientOptions,  options.tokenProvider);
 };
 
 /**

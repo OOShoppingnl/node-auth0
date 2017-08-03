@@ -42,7 +42,7 @@ var ConnectionsManager = function (options) {
    *
    * @type {external:Auth0RestClient}
    */
-  this.resource = new Auth0RestClient(options.baseUrl + '/connections/:id ', apiOptions, options.managementTokenProvider);
+  this.resource = new Auth0RestClient(options.baseUrl + '/connections/:id ', apiOptions, options.tokenProvider);
 };
 
 

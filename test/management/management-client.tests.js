@@ -23,7 +23,6 @@ describe('ManagementClient', function () {
         .to.throw(ArgumentError, 'Management API SDK options must be an object');
     });
 
-
     it('should raise an error when the token is not valid', function () {
       var options = { token: '', domain: 'tenant.auth.com' };
       var client = ManagementClient.bind(null, options);
@@ -51,6 +50,30 @@ describe('ManagementClient', function () {
 
       expect(client)
         .to.throw(ArgumentError, 'Must provide a Client Secret');
+    });
+
+    it('should raise an error when the token provider does not have a function getAccessToken', function () {
+      var client = ManagementClient.bind(null, { tokenProvider : {} });
+
+      expect(client)
+        .to.throw(ArgumentError, 'The tokenProvider does not have a function getAccessToken');
+    });
+
+    it('should raise an error when the token provider does have a property getAccessToken that is not a function', function () {
+      var client = ManagementClient.bind(null, { tokenProvider : { getAccessToken: [] } });
+
+      expect(client)
+        .to.throw(ArgumentError, 'The tokenProvider does not have a function getAccessToken');
+    });
+
+    it('should set the tokenProvider instance property if provider is passed', function () {
+      var fakeTokenProvider = { getAccessToken: function(){} };
+      var options = { tokenProvider : fakeTokenProvider };
+      var client = new ManagementClient( options);
+
+      expect(client.tokenProvider)
+        .to.exist
+        .to.be.equal(fakeTokenProvider);
     });
 
     describe('instance properties', function () {

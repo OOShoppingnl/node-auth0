@@ -37,7 +37,7 @@ var UsersManager = function (options){
     query: { repeatParams: false }
   };
   
-  this.users = new Auth0RestClient(options.baseUrl + '/users/:id', clientOptions, options.managementTokenProvider);
+  this.users = new Auth0RestClient(options.baseUrl + '/users/:id', clientOptions, options.tokenProvider);
 
   /**
    * Provides an abstraction layer for consuming the
@@ -46,28 +46,28 @@ var UsersManager = function (options){
    *
    * @type {external:Auth0RestClient}
    */
-  this.multifactor = new Auth0RestClient(options.baseUrl + '/users/:id/multifactor/:provider', clientOptions, options.managementTokenProvider);
+  this.multifactor = new Auth0RestClient(options.baseUrl + '/users/:id/multifactor/:provider', clientOptions, options.tokenProvider);
 
   /**
    * Provides a simple abstraction layer for linking user accounts.
    *
    * @type {external:Auth0RestClient}
    */
-  this.identities = new Auth0RestClient(options.baseUrl + '/users/:id/identities/:provider/:user_id', clientOptions, options.managementTokenProvider);
+  this.identities = new Auth0RestClient(options.baseUrl + '/users/:id/identities/:provider/:user_id', clientOptions, options.tokenProvider);
 
   /**
    * Provides a simple abstraction layer for user logs
    *
    * @type {external:Auth0RestClient}
    */
-  this.userLogs = new Auth0RestClient(options.baseUrl + '/users/:id/logs', clientOptions, options.managementTokenProvider);
+  this.userLogs = new Auth0RestClient(options.baseUrl + '/users/:id/logs', clientOptions, options.tokenProvider);
 
   /**
    * Provides an abstraction layer for retrieving Guardian enrollments.
    *
    * @type {external:Auth0RestClient}
    */
-  this.enrollments = new Auth0RestClient(options.baseUrl + '/users/:id/enrollments', clientOptions, options.managementTokenProvider);
+  this.enrollments = new Auth0RestClient(options.baseUrl + '/users/:id/enrollments', clientOptions, options.tokenProvider);
 };
 
 

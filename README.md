@@ -29,6 +29,29 @@ var management = new ManagementClient({
 });
 ~~~
 
+Or initialize your client class with a  Non Interactive Client Client Id and Client Secret and a domain.
+~~~js
+var ManagementClient = require('auth0').ManagementClient;
+var auth0 = new ManagementClient({
+  clientId: '{YOUR_CLIENT_ID}',
+  clientSecret: '{YOUR_CLIENT_SECRET}',
+  domain: '{YOUR_ACCOUNT}.auth0.com'
+});
+~~~
+
+Or initialize your client class with the ManagementTokenProvider.
+~~~js
+var ManagementClient = require('auth0').ManagementClient;
+var ManagementTokenProvider = require('auth0').ManagementTokenProvider;
+var auth0 = new ManagementClient({
+  tokenProvider: new ManagementTokenProvider({
+    clientId: '{YOUR_CLIENT_ID}',
+    clientSecret: '{YOUR_CLIENT_SECRET}',
+    domain: '{YOUR_ACCOUNT}.auth0.com'
+  })
+ });
+~~~
+
 Note: When using at browser you should use `telemetry: false`.
 
 ## Authentication API Client

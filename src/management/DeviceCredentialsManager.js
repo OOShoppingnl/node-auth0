@@ -50,7 +50,7 @@ var DeviceCredentialsManager = function (options) {
    *
    * @type {external:Auth0RestClient}
    */
-  this.resource = new Auth0RestClient(options.baseUrl + '/device-credentials/:id', clientOptions, options.managementTokenProvider);
+  this.resource = new Auth0RestClient(options.baseUrl + '/device-credentials/:id', clientOptions, options.tokenProvider);
 };
 
 

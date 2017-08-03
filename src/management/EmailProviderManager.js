@@ -49,7 +49,7 @@ var EmailProviderManager = function (options) {
    *
    * @type {external:Auth0RestClient}
    */
-  this.resource = new Auth0RestClient(options.baseUrl + '/emails/provider', clientOptions, options.managementTokenProvider);
+  this.resource = new Auth0RestClient(options.baseUrl + '/emails/provider', clientOptions, options.tokenProvider);
 };
 
 

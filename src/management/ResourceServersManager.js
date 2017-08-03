@@ -48,7 +48,7 @@ var ResourceServersManager = function (options) {
    *
    * @type {external:Auth0RestClient}
    */
-  this.resource = new Auth0RestClient(options.baseUrl + '/resource-servers/:id', apiOptions, options.managementTokenProvider);
+  this.resource = new Auth0RestClient(options.baseUrl + '/resource-servers/:id', apiOptions, options.tokenProvider);
 };
 
 /**

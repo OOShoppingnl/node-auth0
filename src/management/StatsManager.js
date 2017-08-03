@@ -43,7 +43,7 @@ var StatsManager = function (options){
    *
    * @type {external:Auth0RestClient}
    */
-  this.stats = new Auth0RestClient(options.baseUrl + '/stats/:type', clientOptions, options.managementTokenProvider);
+  this.stats = new Auth0RestClient(options.baseUrl + '/stats/:type', clientOptions, options.tokenProvider);
 };
 
 

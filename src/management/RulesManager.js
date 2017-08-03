@@ -49,7 +49,7 @@ var RulesManager = function (options) {
    *
    * @type {external:Auth0RestClient}
    */
-  this.resource = new Auth0RestClient(options.baseUrl + '/rules/:id ', apiOptions, options.managementTokenProvider);
+  this.resource = new Auth0RestClient(options.baseUrl + '/rules/:id ', apiOptions, options.tokenProvider);
 };
 
 

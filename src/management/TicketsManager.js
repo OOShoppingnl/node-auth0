@@ -33,7 +33,7 @@ var TicketsManager = function (options){
    *
    * @type {external:Auth0RestClient}
    */
-  this.ticket = new Auth0RestClient(options.baseUrl + '/tickets/:type', clientOptions, options.managementTokenProvider);
+  this.ticket = new Auth0RestClient(options.baseUrl + '/tickets/:type', clientOptions, options.tokenProvider);
 };
 
 

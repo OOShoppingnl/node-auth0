@@ -49,53 +49,70 @@ var BASE_URL_FORMAT = 'https://%s/api/v2';
  * });
  * 
  * @example <caption>
- *   Initialize your client class with an API v2 token (you can generate one
- *   <a href="https://auth0.com/docs/apiv2">here</a>) and a domain.
+ *   Initialize your client class with a  Non Interactive Client Client Id and Client Secret 
+ *   (<a href="https://auth0.com/docs/apiv2">docs</a>) and a domain.
  * </caption>
  *
  * var ManagementClient = require('auth0').ManagementClient;
  * var auth0 = new ManagementClient({
- *   clientId: '{YOUR_CLIENT_ID}',
- *   clientSecret: '{YOUR_CLIENT_SECRET}',
+ *   clientId: '{YOUR_NON_INTERACTIVE_CLIENT_ID}',
+ *   clientSecret: '{YOUR_NON_INTERACTIVE_CLIENT_SECRET}',
  *   domain: '{YOUR_ACCOUNT}.auth0.com'
  * });
+ * 
+  * @example <caption>
+ *   Initialize your client class with the Management Token Provider. 
+ * </caption>
  *
- * @param   {Object}  options           Options for the ManagementClient SDK.
- * @param   {String}  options.token     API access token. (not required when Client ID and Client Secret are provided)
- * @param   {String}  [options.domain]  ManagementClient server domain.
+ * var ManagementClient = require('auth0').ManagementClient;
+ * var ManagementTokenProvider = require('auth0').ManagementTokenProvider;
+ * var auth0 = new ManagementClient({
+ *   tokenProvider: new ManagementTokenProvider({
+ *    clientId: '{YOUR_NON_INTERACTIVE_CLIENT_ID}',
+ *    clientSecret: '{YOUR_NON_INTERACTIVE_CLIENT_SECRET}',
+ *    domain: '{YOUR_ACCOUNT}.auth0.com'
+ *   })
+ * });
+ *
+ * @param   {Object}  options                 Options for the ManagementClient SDK. 
+ *          Required properties depend on the way intialization is performed as you can see in the examples.
+ * @param   {String}  [options.token]         API access token.
+ * @param   {String}  [options.domain]        ManagementClient server domain.
  * @param   {String}  [options.clientId]      Non Interactive client ID.
  * @param   {String}  [options.clientSecret]  Non Interactive client Secret.
+ * @param   {String}  [options.tokenProvider] Token Provider.
+ * 
  */
 var ManagementClient = function (options) {
   if (!options || typeof options !== 'object') {
     throw new ArgumentError('Management API SDK options must be an object');
   }
 
-  if (!options.domain || options.domain.length === 0) {
-    throw new ArgumentError('Must provide a Domain');
-  }
-
-  if (!options.token || options.token.length === 0) {
-    var isClientIdMissing = !options.clientId || options.clientId.length === 0;
-    var isClientSecretMissing = !options.clientSecret || options.clientSecret.length === 0;
-
-    if(isClientIdMissing && isClientSecretMissing){
-      throw new ArgumentError('An Access Token must be provided or a Client ID and Client Secret');
+  if(!options.tokenProvider){
+    if (!options.domain || options.domain.length === 0) {
+      throw new ArgumentError('Must provide a Domain');
     }
 
-    if (isClientIdMissing) {
-      throw new ArgumentError('Must provide a Client Id');
-    }
+    if (!options.token || options.token.length === 0) {
+      var isClientIdMissing = !options.clientId || options.clientId.length === 0;
+      var isClientSecretMissing = !options.clientSecret || options.clientSecret.length === 0;
 
-    if (isClientSecretMissing) {
-      throw new ArgumentError('Must provide a Client Secret');
+      if (isClientIdMissing && isClientSecretMissing) {
+        throw new ArgumentError('An Access Token must be provided or a Client ID and Client Secret');
+      }
+      
+      this.tokenProvider = new ManagementTokenProvider({
+        clientID: options.clientId,
+        clientSecret: options.clientSecret,
+        domain: options.domain
+      });
     }
-
-    this.managementTokenProvider = new ManagementTokenProvider({
-      clientID: options.clientId,
-      clientSecret: options.clientSecret,
-      domain: options.domain
-    });
+  }else{
+    if(!options.tokenProvider.getAccessToken ||  typeof options.tokenProvider.getAccessToken !== 'function'){
+      throw new ArgumentError('The tokenProvider does not have a function getAccessToken');
+    }
+    
+    this.tokenProvider = options.tokenProvider;
   }
 
   var managerOptions = {
@@ -104,11 +121,12 @@ var ManagementClient = function (options) {
       'Content-Type': 'application/json'
     },
     baseUrl: util.format(BASE_URL_FORMAT, options.domain),
-    managementTokenProvider: this.managementTokenProvider
+    tokenProvider: this.tokenProvider
   };
 
-  if(options.token && options.token.length === 0){
-      managerOptions.headers['Authorization'] = 'Bearer ' + options.token;
+  if (options.token && options.token.length !== 0) {
+    console.log('SET HEADER');
+    managerOptions.headers['Authorization'] = 'Bearer ' + options.token;
   }
 
   if (options.telemetry !== false) {
